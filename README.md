@@ -41,7 +41,6 @@ This way it's impossible for victims to hide their "Last Time Seen"-status as ev
  - After the first online-state has been detected the timer starts running
 
 # **Preview**
-** - Following - **
 
 # **Developer**
-##**Shiva**
+ - **Shiva**
