@@ -35,6 +35,7 @@ if duration != 0:
 	duration = duration * 60
 	int(duration)
 
+now = datetime.datetime.now()
 website = "https://web.whatsapp.com/";
 xpath_target = '//span[@title="' + target + '"]'
 xpath_input = '//div[@class="input"][@dir="auto"][@data-tab="1"]'
@@ -43,6 +44,7 @@ lastOnlineState = ""
 totalOnline = 0
 totalOffline = 0
 timeElapsed = 0
+fileName = "[" + str(now.day) + "." + str(now.month) + "." + str(now.year) + " " + str(now.hour) + ":" + str(now.minute) + "] [" + target.replace(" ","") + "].log" 
 
 print ""
 print "Launching Chrome"
@@ -72,6 +74,10 @@ print "Wait for chat to load.."
 print ""
 online_state = wait.until(EC.presence_of_element_located((By.XPATH, xpath_online)))
 time.sleep(3)
+
+print "Logging started in '" + fileName + "'"
+print ""
+f = open(fileName, 'w')
 
 print "Online-State ready - Monitoring '" + target + "'"
 print "________________________________________"
@@ -125,14 +131,25 @@ for x in range(0, duration):
 			print "[" + target + "] was " + lastOnlineState + " from " + oldTimeNow + " - " + timenow
 			print "[Total Time] " + str(totalOnline) + " seconds Online | " + str(totalOffline) + " seconds Offline"
 			print "[Online Proportion] " + str(onlineProportion) + "%"
+		
+			f.write(" --- " + timenow + " --- \n")
+			f.write("[" + target + "] " + currentOnlineState + " (" + str(timeElapsed) + " seconds " + lastOnlineState + ")\n")
+			f.write("[" + target + "] was " + lastOnlineState + " from " + oldTimeNow + " - " + timenow)
+			f.write("[Total Time] " + str(totalOnline) + " seconds Online | " + str(totalOffline) + " seconds Offline\n")
+			f.write("[Online Proportion] " + str(onlineProportion) + "%")  
 		else:
 			print " --- " + timenow + " --- "
 			print "[" + target + "]" + " is " + currentOnlineState
 		
+			f.write(" --- " + timenow + " --- \n")
+			f.write("[" + target + "]" + " is " + currentOnlineState + "\n")
+
 		oldTimeNow = timenow
 		oldNow = time.time()
 		lastOnlineState = currentOnlineState
+		
 		print ""
+		f.write("\n")
 	
 	time.sleep(1)
 
@@ -143,4 +160,11 @@ print "[Total Time] " + str(totalOnline) + " seconds Online | " + str(totalOffli
 print "[Online Proportion] " + str(onlineProportion) + "%"
 print ""
 
+f.write("________________________________________\n")
+f.write("Monitoring '" + target + "' finished after " + str(duration/60) + " minute(s).\n")
+f.write("\n")
+f.write("[Total Time] " + str(totalOnline) + " seconds Online | " + str(totalOffline) + " seconds Offline\n")
+f.write("[Online Proportion] " + str(onlineProportion) + "%\n")
+
+f.close()
 sys.exit(1)
