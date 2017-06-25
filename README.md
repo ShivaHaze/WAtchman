@@ -1,7 +1,7 @@
 # **About WAtchman**
 WAtchman is a bot written in Python.
-Its purpose is to monitor individuals on Web WhatsApp to harvest the times their online or not.
-This way it's not possible for targets to hide their "Last Time Seen"-Status as everything is beeing logged.
+The purpose is to monitor individuals on Web WhatsApp in order to harvest the time one is online or not.
+This way it's not possible for victims to hide their "Last Time Seen"-Status as everything is beeing logged.
 
 # **Dependencies**
  - [Python 2.7+](https://www.python.org/download/releases/2.7/)
