@@ -42,6 +42,7 @@ xpath_online = '//*[@id="main"]/header/div[2]/div[2]/span'
 lastOnlineState = ""
 totalOnline = 0
 totalOffline = 0
+timeElapsed = 0
 
 print ""
 print "Launching Chrome"
@@ -102,19 +103,23 @@ for x in range(0, duration):
 	except:
 		currentOnlineState = "Offline"
 	
+	try:
+		timeElapsed = time.time() - oldNow
+	except:
+		oldNow = time.time()
+
+	timeElapsed = int(timeElapsed)
+
+	if lastOnlineState == "Online":
+		totalOnline += 1
+	else:
+		totalOffline += 1
+
+	onlineProportion = (totalOnline*100.00/(totalOnline*100.00 + totalOffline*100.00))*100.00
+	onlineProportion = round(onlineProportion, 2) 
+
 	if lastOnlineState != currentOnlineState:		
 		if lastOnlineState != "":
-			timeElapsed = time.time() - oldNow
-			timeElapsed = int(timeElapsed)
-
-			if lastOnlineState == "Online":
-				totalOnline += timeElapsed
-			else:
-				totalOffline += timeElapsed
-
-			onlineProportion = (totalOnline*100.00/(totalOnline*100.00 + totalOffline*100.00))*100.00
-			onlineProportion = round(onlineProportion, 2) 
-
 			print " --- " + timenow + " --- "
 			print "[" + target + "] " + currentOnlineState + " (" + str(timeElapsed) + " seconds " + lastOnlineState + ")"
 			print "[" + target + "] was " + lastOnlineState + " from " + oldTimeNow + " - " + timenow
