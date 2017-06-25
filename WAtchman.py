@@ -3,6 +3,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+import os
 import time
 import datetime
 import sys  
@@ -10,9 +11,11 @@ import sys
 try:
 	target = ""
 	duration = ""
+	logging = ""
 
 	target = sys.argv[1]
 	duration = int(sys.argv[2])
+	logging = int(sys.argv[3])
 except:
 	pass
 
@@ -29,6 +32,11 @@ if duration == "":
 else:
 	print "Duration in minutes: " + str(duration)
 
+if logging == "":
+	logging = raw_input("Activate logging? Y/N: ")
+else:
+	print "Activate logging? Y/N: " + str(logging)
+
 print "________________________________________"
 
 if duration != 0:
@@ -44,7 +52,16 @@ lastOnlineState = ""
 totalOnline = 0
 totalOffline = 0
 timeElapsed = 0
-fileName = "[" + str(now.day) + "." + str(now.month) + "." + str(now.year) + " " + str(now.hour) + ":" + str(now.minute) + "] [" + target.replace(" ","") + "].log" 
+fileName = "[" + str(now.day) + "." + str(now.month) + "." + str(now.year) + " " + str(now.hour) + ":" + str(now.minute) + "] [" + target + "].log" 
+
+scriptPath = os.path.abspath(__file__)
+scriptDir = os.path.split(scriptPath)[0]
+
+relTotalPath = "logs/" + target + "/" + fileName
+relLogFolderPath = "logs/" + target + "/"
+
+absFilePath = os.path.join(scriptDir, relTotalPath)
+absFolderPath = os.path.join(scriptDir, relLogFolderPath)
 
 print ""
 print "Launching Chrome"
@@ -64,22 +81,29 @@ wait = WebDriverWait(driver, 600)
 print "Waiting until '" + target + "' is locateable"
 print " - Login to continue - "
 print ""
-group_title = wait.until(EC.presence_of_element_located((By.XPATH, xpath_target)))
+targetName = wait.until(EC.presence_of_element_located((By.XPATH, xpath_target)))
 
 print "Open chat with '" + target + "'"
 print ""
-group_title.click()
+targetName.click()
 
 print "Wait for chat to load.."
 print ""
-online_state = wait.until(EC.presence_of_element_located((By.XPATH, xpath_online)))
+onlineState = wait.until(EC.presence_of_element_located((By.XPATH, xpath_online)))
 time.sleep(3)
 
-print "Logging started in '" + fileName + "'"
-print ""
-f = open(fileName, 'w')
+if logging == "y" or logging == "Y" or logging == 1:
+	if not os.path.exists(absFolderPath):
+	    print "Log folder for '" + target + "' missing - Creating new one"
+	    print ""
+	    os.makedirs(absFolderPath)
 
-print "Online-State ready - Monitoring '" + target + "'"
+	print "Logging started in"
+	print "'" + absFilePath + "'"
+	print ""
+	f = open(absFilePath, "w")
+
+print "Monitoring '" + target + "'"
 print "________________________________________"
 print ""
 
@@ -132,24 +156,28 @@ for x in range(0, duration):
 			print "[Total Time] " + str(totalOnline) + " seconds Online | " + str(totalOffline) + " seconds Offline"
 			print "[Online Proportion] " + str(onlineProportion) + "%"
 		
-			f.write(" --- " + timenow + " --- \n")
-			f.write("[" + target + "] " + currentOnlineState + " (" + str(timeElapsed) + " seconds " + lastOnlineState + ")\n")
-			f.write("[" + target + "] was " + lastOnlineState + " from " + oldTimeNow + " - " + timenow)
-			f.write("[Total Time] " + str(totalOnline) + " seconds Online | " + str(totalOffline) + " seconds Offline\n")
-			f.write("[Online Proportion] " + str(onlineProportion) + "%")  
+			if logging == "y" or logging == "Y" or logging == 1:
+				f.write(" --- " + timenow + " --- \n")
+				f.write("[" + target + "] " + currentOnlineState + " (" + str(timeElapsed) + " seconds " + lastOnlineState + ")\n")
+				f.write("[" + target + "] was " + lastOnlineState + " from " + oldTimeNow + " - " + timenow)
+				f.write("[Total Time] " + str(totalOnline) + " seconds Online | " + str(totalOffline) + " seconds Offline\n")
+				f.write("[Online Proportion] " + str(onlineProportion) + "%\n")  
 		else:
 			print " --- " + timenow + " --- "
 			print "[" + target + "]" + " is " + currentOnlineState
-		
-			f.write(" --- " + timenow + " --- \n")
-			f.write("[" + target + "]" + " is " + currentOnlineState + "\n")
+			
+			if logging == "y" or logging == "Y" or logging == 1:
+				f.write(" --- " + timenow + " --- \n")
+				f.write("[" + target + "]" + " is " + currentOnlineState + "\n")
 
 		oldTimeNow = timenow
 		oldNow = time.time()
 		lastOnlineState = currentOnlineState
 		
 		print ""
-		f.write("\n")
+
+		if logging == "y" or logging == "Y" or logging == 1:
+			f.write("\n")
 	
 	time.sleep(1)
 
@@ -160,11 +188,13 @@ print "[Total Time] " + str(totalOnline) + " seconds Online | " + str(totalOffli
 print "[Online Proportion] " + str(onlineProportion) + "%"
 print ""
 
-f.write("________________________________________\n")
-f.write("Monitoring '" + target + "' finished after " + str(duration/60) + " minute(s).\n")
-f.write("\n")
-f.write("[Total Time] " + str(totalOnline) + " seconds Online | " + str(totalOffline) + " seconds Offline\n")
-f.write("[Online Proportion] " + str(onlineProportion) + "%\n")
+if logging == "y" or logging == "Y" or logging == 1:
+	f.write("________________________________________\n")
+	f.write("Monitoring '" + target + "' finished after " + str(duration/60) + " minute(s).\n")
+	f.write("\n")
+	f.write("[Total Time] " + str(totalOnline) + " seconds Online | " + str(totalOffline) + " seconds Offline\n")
+	f.write("[Online Proportion] " + str(onlineProportion) + "%\n")
 
-f.close()
+	f.close()
+
 sys.exit(1)
